@@ -1,59 +1,43 @@
-##### CRAWLER #####
-yum groupinstall "Development tools"
-yum install -y screen mercurial mysql mysql-devel python-devel python-setuptools python-yaml
-yum -y install gcc openssl-devel bzip2-devel libffi-devel
-cd /usr/src
-wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
-tar xzf Python-3.7.3.tgz
-cd Python-3.7.3
-./configure --enable-optimizations
-make altinstall
-cd /home/ && mkdir crawler && cd /home/crawler && mkdir log && mkdir worker && mkdir proxy && cd /home/crawler/log && mkdir circus && cd /home/crawler
-git clone http://git.blackeye.id/Jeni.Priyanton/dosm_crawler_py3.git
-cd dosm_crawler
-pip install -r requirements.txt
-
-##jika install circus error##
-pip install --upgrade setuptools
- 
-##fiefox 68##
-wget https://download-installer.cdn.mozilla.net/pub/firefox/releases/68.0.1/linux-x86_64/en-US/firefox-68.0.1.tar.bz2
-tar xvjf firefox-68.0.1.tar.bz2
-mv firefox /usr/local/
-ln -s /usr/local/firefox/firefox /usr/bin/firefox
-
-##### selenium crawler #####
-yum install -y Xvfb
+### firefox 68 ###
 yum install -y firefox
-**cd /tmp/ && wget https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz
-tar -zxvf geckodriver-v0.22.0-linux64.tar.gz && mv geckodriver /usr/local/share/
-ln -s /usr/local/share/geckodriver /usr/local/bin/geckodriver && ln -s /usr/local/share/geckodriver /usr/bin/geckodriver**
+cd /tmp/ && wget https://github.com/mozilla/geckodriver/releases/download/v0.30.0/geckodriver-v0.30.0-linux32.tar.gz
+tar -x geckodriver -zf geckodriver-v0.30.0-linux32.tar.gz
+sudo mv geckodriver /usr/bin/geckodriver
+cd /usr/bin/ && scp geckodriver /usr/local/bin/
+sudo chmod +x /usr/bin/geckodriver 
+cd /tmp/ && rm -rf geckodriver-v0.30.0-linux32.tar.gz
 
-##install chromedriver##
-#source http://chromedriver.chromium.org/
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-yum localinstall -y google-chrome-stable_current_x86_64.rpm
-cd /tmp/ && wget https://chromedriver.storage.googleapis.com/75.0.3770.90/chromedriver_linux64.zip
-unzip chromedriver_linux64.zip && mv chromedriver /usr/local/share/
-ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && ln -s /usr/local/share/chromedriver /usr/bin/chromedriver
+### selenium crawler ###
+yum install -y Xvfb
+
+### install chromedriver ###
+First check to - https://chromedriver.storage.googleapis.com/index.html
+curl --insecure https://intoli.com/install-google-chrome.sh | bash or yum install -y https://dl.google.com/linux/chrome/rpm/stable/x86_64/<match specify version what you want>
+cd /tmp/ && wget https://chromedriver.storage.googleapis.com/<get from first step>
+unzip chromedriver_linux64.zip
+sudo mv chromedriver /usr/bin/chromedriver
+sudo chown root:root /usr/bin/chromedriver
+sudo chmod +x /usr/bin/chromedriver
+cd /tmp && rm -rf chromedriver_linux64.zip
 
 ### install pool server ###
 yum install httpd
 
-#install php#
+### install php ###
 yum install php
 
-#install mysql#
+### install mysql ###
 wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
 rpm -ivh mysql-community-release-el7-5.noarch.rpm
 yum install mysql-server
 systemctl start mysqld
 mysqladmin -u root password <set password>
 
-#install phpmyadmin#
+### install phpmyadmin ###
 rpm -iUvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install phpmyadmin
 Vim /etc/httpd/conf.d/phpMyAdmin.conf
+
 ===
 <Directory /usr/share/phpMyAdmin/>
    AddDefaultCharset UTF-8
@@ -96,7 +80,7 @@ Vim /etc/httpd/conf.d/phpMyAdmin.conf
 ====
 systemctl restart httpd.service
 
-##install SSDB###
+### install SSDB ###
 http://ssdb.io/docs/php/
 https://github.com/ideawu/ssdb
 cd /tmp/
@@ -113,7 +97,7 @@ make && make install
 cd /usr/local/ssdb
 start: ./ssdb-server ssdb.conf
 
-###UI SSDB###
+### UI SSDB ###
 scp phpssdbadmin.tar.gz
 tar -xzvf phpssdbadmin.tar.gz
 path var/www/html
@@ -130,21 +114,23 @@ systemctl restart httpd.service
 user = root
 pass = rahasia123
 
-###install Beanstalk###
-yum install beanstalkd
-chkconfig beanstalkd on
-systemctl start beanstalkd.service
-cd /etc
-vim sysconfig/beanstalkd
-Uncomentar : BINLOG_DIR=-b /var/lib/beanstalkd/binlog
+### install Beanstalk ###
+wget http://cbs.centos.org/kojifiles/packages/beanstalkd/1.9/3.el7/x86_64/beanstalkd-1.9-3.el7.x86_64.rpm
+wget http://cbs.centos.org/kojifiles/packages/beanstalkd/1.9/3.el7/x86_64/beanstalkd-debuginfo-1.9-3.el7.x86_64.rpm
+rpm -ivh beanstalkd-1.9-3.el7.x86_64.rpm
+rpm -ivh beanstalkd-debuginfo-1.9-3.el7.x86_64.rpm
+systemctl enable beanstalkd
+systemctl start beanstalkd
+ps aux | grep beanstalkd
+beanstalkd -v
 
-###UI Beanstalkd###
-scp beanstalk.zip
-unzip beanstalk.zip
-path var/www/html
-chmod 777 html/beanstalk-ui/storage.json
+### UI Beanstalkd ### 
+git clone https://github.com/ptrofimov/beanstalk_console.git
+put into your /var/www/html/
+chmod +777 /var/www/html/beanstalk_console/storage.json
+http://<ip server>/beanstalk_console/public/
 
-##create database##
+### create database ###
 mysql -u root -p
 Mysql> Create database dosm_crawler;
 mysql>exit
@@ -152,13 +138,14 @@ import struktur dan data database
 mysql -u root -p dosm_crawler < dosm_crawler_struktur.sql
 mysql -u root -p dosm_crawler < dosm_crawler_data.sql 
 
-#git#
+### git ###
 git reset --hard
     
-#xdpyinfo#
+### xdpyinfo ###
 yum -y install xorg-x11-utils
 
-#install supervisor
+### install supervisor ###
 https://linoxide.com/linux-how-to/supervisor-monitor-linux-servers-processes/
 yum install epel-release -y
 yum install supervisor -y
+
