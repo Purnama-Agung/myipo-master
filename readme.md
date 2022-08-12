@@ -40,8 +40,6 @@ Vim /etc/httpd/conf.d/phpMyAdmin.conf
 
 ===
 <Directory /usr/share/phpMyAdmin/>
-   AddDefaultCharset UTF-8
-
    <IfModule mod_authz_core.c>
      # Apache 2.4
      <RequireAny>
@@ -78,6 +76,7 @@ Vim /etc/httpd/conf.d/phpMyAdmin.conf
    </IfModule>
 </Directory>
 ====
+
 systemctl restart httpd.service
 
 ### install SSDB ###
